@@ -14,7 +14,7 @@ import (
 
 var (
 	etcdRoot = flag.String("csi.config.etcd.root", "", "etcd root dir for config info")
-	machines = flag.String("csi.config.etcd.machines", "", "etcd machines in host:port,host:port,... format")
+	machines = flag.String("csi.config.etcd.machines", "", "etcd machines in http://host:port,host:port,... format")
 	regexstr = flag.String("regex", "", "regex string that matches files to be notified.")
 )
 
@@ -33,7 +33,7 @@ func main() {
 	}
 
 	etcdConn := etcd.NewClient(strings.Split(machinesStr, ","))
-	if etcdConn != nil {
+	if etcdConn == nil {
 		log.Fatalf("error connecting to etcd machines, %s", machines)
 	}
 	fmt.Printf("connected to etcd machines %s\n", machinesStr)

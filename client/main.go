@@ -34,7 +34,7 @@ func main() {
 
 	etcdConn := etcd.NewClient(strings.Split(machinesStr, ","))
 	if etcdConn == nil {
-		log.Fatalf("error connecting to etcd machines, %s", machines)
+		log.Fatalf("error connecting to etcd machines, %s", *machines)
 	}
 	fmt.Printf("connected to etcd machines %s\n", machinesStr)
 
@@ -44,7 +44,7 @@ func main() {
 
 	regex, err := regexp.Compile(*regexstr)
 	if err != nil {
-		log.Fatalf("regex string %s is not valid: %s\n", regexstr, err)
+		log.Fatalf("regex string %s is not valid: %s\n", *regexstr, err)
 	}
 
 	// counter pkgname and prefix should be empty
@@ -62,7 +62,7 @@ func main() {
 
 		tm := time.Unix(info.Commit.TimeStamp, 0)
 
-		fmt.Printf("Repo: %s, Branch: %s, Commit: %s, Who: %s, When: %d, Subject: %s\n",
+		fmt.Printf("Repo: %s, Branch: %s, Commit: %s, Who: %s, When: %s, Subject: %s\n",
 			info.Repo, info.Branch, info.Version, info.Commit.CommitterEmail,
 			tm.Format("Jan 2, 2006 at 3:04pm (MST)"), info.Commit.Subject)
 		switch strings.ToLower(mod.Op) {

@@ -154,6 +154,11 @@ func (d dummyFuncs) AddListener(pathRegEx *regexp.Regexp) *chan ModifiedFile {
 	return &ch
 }
 
+func (d dummyFuncs) Watch(string, func([]byte) error, chan<- error) error {
+	log.Warning("dummy Watch() is called. It does nothing")
+	return nil
+}
+
 // RemoveListener remove a listener channel
 func (d dummyFuncs) RemoveListener(ch *chan ModifiedFile) {
 	log.Warning("dummy RemoveListener() is called. It does nothing")

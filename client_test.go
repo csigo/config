@@ -205,3 +205,29 @@ func (c *ConfigClientTestSuite) TestListener() {
 	}
 	cli.Stop()
 }
+
+func (c *ConfigClientTestSuite) TestWatch() {
+	// set file and create client
+	tcli, err := NewClient(c.etcdCli, c.root)
+	assert.NoError(c.T(), err)
+	cli, _ := tcli.(*clientImpl)
+
+	ch := make(chan []byte, 1)
+	callback := func(val []byte) error {
+		ch <- val
+		return nil
+	}
+
+	// watch should return error if there's no value in path
+	c.Error(cli.Watch("test/ok", callback, nil))
+
+	path := "test/ok"
+	value := "testGet"
+	c.etcdCli.Set(filepath.Join(c.root, path), value, 0)
+	c.NoError(cli.Watch("test/ok", callback, nil))
+	cf := &ConfigInfo{ModFiles: []ModifiedFile{ModifiedFile{Op: "test", Path: "/test/ok"}}}
+	go cli.fireFileChangeEvent(cf)
+
+	c.Equal("testGet", string(<-ch))
+	c.Equal("testGet", string(<-ch))
+}

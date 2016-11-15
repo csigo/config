@@ -31,6 +31,10 @@ type Client interface {
 	// through the channel
 	AddListener(pathRegEx *regexp.Regexp) *chan ModifiedFile
 
+	// Watch watches change of a file and invokes callback. It also invokes callback for the
+	// first time and return error if there's one.
+	Watch(path string, callback func([]byte) error, errChan chan<- error) error
+
 	// RemoveListener remove a listener channel
 	RemoveListener(ch *chan ModifiedFile)
 
@@ -288,6 +292,39 @@ func (c *clientImpl) AddListener(pathRegEx *regexp.Regexp) *chan ModifiedFile {
 	cn := make(chan ModifiedFile)
 	c.listeners = append(c.listeners, &regexChan{regex: pathRegEx, ch: &cn})
 	return &cn
+}
+
+func (c *clientImpl) Watch(
+	path string,
+	callback func([]byte) error,
+	errChan chan<- error,
+) error {
+	// do is a helper function that gets a config path and invokes callback
+	do := func() error {
+		data, err := c.Get(path)
+		if err != nil {
+			return err
+		}
+		return callback(data)
+	}
+
+	// Invoke callback for initialization
+	if err := do(); err != nil {
+		return err
+	}
+
+	// Listen to specified path and invoke callback accordingly
+	ch := c.AddListener(regexp.MustCompile(path))
+	go func() {
+		for range *ch {
+			if err := do(); err != nil {
+				if errChan != nil {
+					errChan <- err
+				}
+			}
+		}
+	}()
+	return nil
 }
 
 // RemoveListener remove a listener channel. RemoveListener will not call

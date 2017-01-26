@@ -45,3 +45,9 @@ func (m *MockClient) List(path string) (map[string][]byte, error) {
 	args := m.Called(path)
 	return args.Get(0).(map[string][]byte), args.Error(1)
 }
+
+// Watch watches change of a file and invokes callback. It also invokes callback for the
+func (m *MockClient) Watch(path string, callback func([]byte) error, errChan chan<- error) error {
+	args := m.Called(path, callback, errChan)
+	return args.Error(0)
+}

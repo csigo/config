@@ -82,7 +82,7 @@ func Stat(counter stats.Client) func(*clientImpl) error {
 }
 
 // watchRetryTime defines the retry number of watch
-var watchRetryTime = flag.Uint("csi_config_client_etcd_retry", uint(5), "etcd watch failed retry times")
+var watchRetryTime = flag.Uint("csi_config_client_etcd_retry", uint(5), "etcd watch failed retry times, 0 for unlimited retry")
 
 // fatalFn is used to test for watch
 var fatalfFn = logrus.Fatalf
@@ -151,7 +151,7 @@ func (c *clientImpl) loop(infoPath string, initErr chan error) {
 			if !ok {
 				// watch error, retry
 				retry++
-				if retry > *watchRetryTime {
+				if *watchRetryTime > 0 && retry > *watchRetryTime {
 					fatalfFn("retry watch failed over %v times", *watchRetryTime)
 				}
 				logrus.Errorf("watch etcd root<%s> failed, retry: %v", infoPath, retry)

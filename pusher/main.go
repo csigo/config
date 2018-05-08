@@ -16,9 +16,9 @@ import (
 	"strings"
 
 	"github.com/BurntSushi/cmd"
-	log "github.com/Sirupsen/logrus"
 	"github.com/coreos/go-etcd/etcd"
 	"github.com/csigo/config"
+	log "github.com/sirupsen/logrus"
 )
 
 const (

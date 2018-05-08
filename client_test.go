@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/coreos/go-etcd/etcd"
 	"github.com/csigo/portforward"
 	"github.com/csigo/test"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )

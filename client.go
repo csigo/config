@@ -192,6 +192,9 @@ func (c *clientImpl) loop(infoPath string, initErr chan error) {
 
 		// empty cache
 		for _, f := range info.ModFiles {
+			if _, ok := c.cache[f.Path]; !ok {
+				continue
+			}
 			logrus.Infof("delete %v from cache", f.Path)
 			c.cacheLock.Lock()
 			delete(c.cache, f.Path)
@@ -376,6 +379,7 @@ func (c *clientImpl) fireFileChangeEvent(info *ConfigInfo) {
 			if regch.regex.Match([]byte(f.Path)) {
 				logrus.Infof("Matched listener <%v> vs file <%v>", regch, f)
 				*regch.ch <- f
+				break
 			}
 		}
 	}

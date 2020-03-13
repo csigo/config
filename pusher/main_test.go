@@ -55,7 +55,7 @@ func (s *ConfigTestSuite) SetupSuite() {
 		log.Fatalf("etcd failed, %s", err)
 	}
 	assert.NoError(s.T(), err)
-	etcdEnsemble := fmt.Sprintf("http://localhost:%d", port)
+	etcdEnsemble := fmt.Sprintf("http://localhost:%s", port)
 	s.etcdConn = etcd.NewClient(strings.Split(etcdEnsemble, etcdDelimiter))
 	assert.NotNil(s.T(), s.etcdConn)
 

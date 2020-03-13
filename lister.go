@@ -75,12 +75,12 @@ func newLister(client *clientImpl, path string) (*lister, error) {
 			//update the struct
 			switch strings.ToUpper(mod.Op) {
 			case "A":
-				logrus.Info("add file path: %v", mod.Path)
+				logrus.Infof("add file path: %s", mod.Path)
 				ls.lock.Lock()
 				ls.tree[mod.Path] = struct{}{}
 				ls.lock.Unlock()
 			case "D":
-				logrus.Info("delete file path: %v", mod.Path)
+				logrus.Infof("delete file path: %s", mod.Path)
 				ls.lock.Lock()
 				delete(ls.tree, mod.Path)
 				ls.lock.Unlock()

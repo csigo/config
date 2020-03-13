@@ -38,13 +38,15 @@ func (c *ConfigClientTestSuite) SetupSuite() {
 	fmt.Println("starting etcd")
 	c.srvLaunch = test.NewServiceLauncher()
 	port, stop, err := c.srvLaunch.Start(test.Etcd)
+	// p, err := strconv.Atoi(port)
+	// assert.NoError(c.T(), err)
 	c.srvStop = stop
-	c.srvPort = port
+	// c.srvPort = p
 	if err != nil {
 		log.Fatalf("etcd failed, %s", err)
 	}
 	assert.NoError(c.T(), err)
-	etcdEnsemble := fmt.Sprintf("http://localhost:%d", port)
+	etcdEnsemble := fmt.Sprintf("http://%s", port)
 	c.etcdCli = etcd.NewClient([]string{etcdEnsemble})
 	assert.NotNil(c.T(), c.etcdCli)
 	fmt.Println("started etcd")

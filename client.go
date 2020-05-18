@@ -81,6 +81,14 @@ func Stat(counter stats.Client) func(*clientImpl) error {
 	}
 }
 
+// NoMatchingLogs skip matching logs
+func NoMatchingLogs() func(*clientImpl) error {
+	return func(c *clientImpl) error {
+		c.noMatchingLogs = true
+		return nil
+	}
+}
+
 // watchRetryTime defines the retry number of watch
 var watchRetryTime = flag.Uint("csi_config_client_etcd_retry", uint(5), "etcd watch failed retry times, 0 for unlimited retry")
 
@@ -107,8 +115,9 @@ type clientImpl struct {
 	// listers is a map from path to all listers.
 	listers map[string]*lister
 	// listerLock protects listers
-	listerLock sync.Mutex
-	stopCh     chan bool
+	listerLock     sync.Mutex
+	stopCh         chan bool
+	noMatchingLogs bool
 }
 
 // init start monitoring the config file
@@ -183,6 +192,9 @@ func (c *clientImpl) loop(infoPath string, initErr chan error) {
 
 		// empty cache
 		for _, f := range info.ModFiles {
+			if _, ok := c.cache[f.Path]; !ok {
+				continue
+			}
 			logrus.Infof("delete %v from cache", f.Path)
 			c.cacheLock.Lock()
 			delete(c.cache, f.Path)
@@ -361,10 +373,13 @@ func (c *clientImpl) fireFileChangeEvent(info *ConfigInfo) {
 
 	for _, regch := range listeners {
 		for _, f := range info.ModFiles {
-			logrus.Infof("Matching listener <%v> vs file <%v>", regch, f)
+			if !c.noMatchingLogs {
+				logrus.Infof("Matching listener <%v> vs file <%v>", regch, f)
+			}
 			if regch.regex.Match([]byte(f.Path)) {
 				logrus.Infof("Matched listener <%v> vs file <%v>", regch, f)
 				*regch.ch <- f
+				break
 			}
 		}
 	}
